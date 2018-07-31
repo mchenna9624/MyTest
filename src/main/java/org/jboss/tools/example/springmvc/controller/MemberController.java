@@ -39,6 +39,8 @@ public class MemberController {
     @RequestMapping(method = RequestMethod.GET)
     public String displaySortedMembers(Model model) {
         model.addAttribute("newMember", new Member());
+        System.out.println("##################################################");
+        System.out.println(System.getenv("HOSTNAME"));
         model.addAttribute("members", memberDao.findAllOrderedByName());
         return "index";
     }
