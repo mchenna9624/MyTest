@@ -16,11 +16,11 @@
  */
 package org.jboss.tools.example.springmvc.controller;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
 import org.jboss.tools.example.springmvc.data.MemberDao;
 import org.jboss.tools.example.springmvc.model.Member;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.UnexpectedRollbackException;
@@ -29,6 +29,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping(value = "/")
@@ -37,19 +38,22 @@ public class MemberController {
     private MemberDao memberDao;
 
     @RequestMapping(method = RequestMethod.GET)
-    public String displaySortedMembers(Model model) {
+    public String displaySortedMembers(Model model, @ModelAttribute("MyAttribute") String myAttribute) {
         model.addAttribute("newMember", new Member());
         System.out.println("##################################################");
         System.out.println(System.getenv("HOSTNAME"));
+        System.out.println("##################################################");
+        System.out.println("MyAttribute=" + myAttribute);
         model.addAttribute("members", memberDao.findAllOrderedByName());
         return "index";
     }
 
     @RequestMapping(method = RequestMethod.POST)
-    public String registerNewMember(@Valid @ModelAttribute("newMember") Member newMember, BindingResult result, Model model) {
+    public String registerNewMember(@Valid @ModelAttribute("newMember") Member newMember, BindingResult result, Model model, HttpServletRequest request, RedirectAttributes redirectAttrs) {
         if (!result.hasErrors()) {
             try {
                 memberDao.register(newMember);
+                redirectAttrs.addFlashAttribute("MyAttribute", "Hello Madhu, You should be safe!!");
                 return "redirect:/";
             } catch (UnexpectedRollbackException e) {
                 model.addAttribute("members", memberDao.findAllOrderedByName());
